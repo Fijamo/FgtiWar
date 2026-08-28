@@ -1,155 +1,201 @@
 package com.duartefijamo.Fgti_war.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.duartefijamo.Fgti_war.FgtiWar;
-import com.duartefijamo.Fgti_war.entities.Player;
-import com.duartefijamo.Fgti_war.utils.Constants;
-
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.duartefijamo.Fgti_war.FgtiWar;
+import com.duartefijamo.Fgti_war.entities.Player;
+import com.duartefijamo.Fgti_war.utils.Constants;
 
+/**
+ * Tela principal do jogo (Fase 1).
+ * Gerencia a renderização do mundo, do jogador e da interface de usuário (UI).
+ */
 public class GameScreen implements Screen {
-    private final FgtiWar game;
+    private final FgtiWar jogo;
     private OrthographicCamera camera;
     private FitViewport viewport;
-    private ShapeRenderer shapeRenderer;
-    private Player player;
+    private ShapeRenderer desenhadorFormas;
+    private Player jogador;
 
-    private Stage uiStage;
+    private Stage palcoUI; // Palco para os botões de controle
     private Skin skin;
+    private boolean pausado = false; // Controle de estado de pausa
 
-    public GameScreen(FgtiWar game) {
-        this.game = game;
+    /**
+     * Construtor da tela de jogo.
+     * @param jogo Instância principal do jogo.
+     */
+    public GameScreen(FgtiWar jogo) {
+        this.jogo = jogo;
         camera = new OrthographicCamera();
-        viewport = new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT, camera);
-        shapeRenderer = new ShapeRenderer();
-        player = new Player(100, 100);
+        viewport = new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL, camera);
+        desenhadorFormas = new ShapeRenderer();
+        jogador = new Player(100, 100);
 
-        createUI();
+        criarInterface();
     }
 
-    private void createUI() {
-        uiStage = new Stage(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
+    /**
+     * Cria a interface de usuário com botões direcionais e controles de navegação.
+     */
+    private void criarInterface() {
+        palcoUI = new Stage(new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL));
 
-        // Multiplexer to handle both UI and potential other input
-        InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(uiStage);
-        Gdx.input.setInputProcessor(multiplexer);
+        // Permite que o palco processe toques na tela
+        InputMultiplexer multiplexador = new InputMultiplexer();
+        multiplexador.addProcessor(palcoUI);
+        Gdx.input.setInputProcessor(multiplexador);
 
-        createSkin();
+        prepararSkin();
 
-        Table table = new Table();
-        table.left().bottom();
-        table.setFillParent(true);
+        // Tabela para botões direcionais (Canto inferior esquerdo)
+        Table tabelaControles = new Table();
+        tabelaControles.left().bottom();
+        tabelaControles.setFillParent(true);
 
-        TextButton leftBtn = new TextButton("<", skin);
-        TextButton rightBtn = new TextButton(">", skin);
-        TextButton jumpBtn = new TextButton("PULO", skin);
+        TextButton botaoEsquerda = new TextButton("<", skin);
+        TextButton botaoDireita = new TextButton(">", skin);
 
-        leftBtn.addListener(new InputListener() {
+        // Configura ouvintes de toque para os botões direcionais
+        botaoEsquerda.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                player.movingLeft = true;
+                jogador.movendoEsquerda = true;
                 return true;
             }
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                player.movingLeft = false;
+                jogador.movendoEsquerda = false;
             }
         });
 
-        rightBtn.addListener(new InputListener() {
+        botaoDireita.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                player.movingRight = true;
+                jogador.movendoDireita = true;
                 return true;
             }
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                player.movingRight = false;
+                jogador.movendoDireita = false;
             }
         });
 
-        jumpBtn.addListener(new InputListener() {
+        // Adiciona botões à tabela (tamanho reduzido para 60x60)
+        tabelaControles.add(botaoEsquerda).size(60, 60).pad(10);
+        tabelaControles.add(botaoDireita).size(60, 60).pad(10);
+        palcoUI.addActor(tabelaControles);
+
+        // Tabela para botões de navegação no topo (Pausa e Voltar)
+        Table tabelaTopo = new Table();
+        tabelaTopo.top().right();
+        tabelaTopo.setFillParent(true);
+
+        TextButton botaoPausa = new TextButton("PAUSA", skin);
+        TextButton botaoVoltar = new TextButton("VOLTAR", skin);
+
+        botaoPausa.addListener(new ClickListener() {
             @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                player.jump();
-                return true;
+            public void clicked(InputEvent event, float x, float y) {
+                pausado = !pausado; // Alterna entre pausa e jogo
             }
         });
 
-        table.add(leftBtn).size(80, 80).pad(10);
-        table.add(rightBtn).size(80, 80).pad(10);
-        table.add().expandX();
-        table.add(jumpBtn).size(100, 80).pad(10);
+        botaoVoltar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Retorna ao Menu Principal
+                jogo.setScreen(new MainMenuScreen(jogo));
+            }
+        });
 
-        uiStage.addActor(table);
+        tabelaTopo.add(botaoPausa).size(80, 40).pad(10);
+        tabelaTopo.add(botaoVoltar).size(80, 40).pad(10);
+        palcoUI.addActor(tabelaTopo);
     }
 
-    private void createSkin() {
+    /**
+     * Define o estilo visual dos botões.
+     */
+    private void prepararSkin() {
         skin = new Skin();
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
-        skin.add("white", new Texture(pixmap));
+        skin.add("branco", new Texture(pixmap));
 
-        BitmapFont font = new BitmapFont();
-        skin.add("default", font);
+        BitmapFont fonte = new BitmapFont();
+        skin.add("padrao", fonte);
 
-        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
-        textButtonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
-        textButtonStyle.down = skin.newDrawable("white", Color.NAVY);
-        textButtonStyle.font = skin.getFont("default");
-        skin.add("default", textButtonStyle);
+        TextButton.TextButtonStyle estiloBotao = new TextButton.TextButtonStyle();
+        estiloBotao.up = skin.newDrawable("branco", Color.DARK_GRAY);
+        estiloBotao.down = skin.newDrawable("branco", Color.NAVY);
+        estiloBotao.font = skin.getFont("padrao");
+        skin.add("default", estiloBotao);
     }
 
     @Override
     public void render(float delta) {
-        player.update(delta);
+        // Se não estiver pausado, atualiza a lógica do jogador
+        if (!pausado) {
+            jogador.atualizar(delta);
+        }
 
+        // Limpa a tela com cor azul céu
         Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // Atualiza a câmera e desenha o mundo
         camera.update();
-        shapeRenderer.setProjectionMatrix(camera.combined);
+        desenhadorFormas.setProjectionMatrix(camera.combined);
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(com.badlogic.gdx.graphics.Color.GREEN);
-        shapeRenderer.rect(0, 0, Constants.V_WIDTH, 50); // Floor
-        player.draw(shapeRenderer);
-        shapeRenderer.end();
+        desenhadorFormas.begin(ShapeRenderer.ShapeType.Filled);
 
-        uiStage.act(delta);
-        uiStage.draw();
+        // Desenha o Chão (Verde)
+        desenhadorFormas.setColor(Color.GREEN);
+        desenhadorFormas.rect(0, 0, Constants.LARGURA_VIRTUAL, 50);
+
+        // Desenha o Jogador
+        jogador.desenhar(desenhadorFormas);
+
+        desenhadorFormas.end();
+
+        // Atualiza e desenha os botões da interface
+        palcoUI.act(delta);
+        palcoUI.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        uiStage.getViewport().update(width, height, true);
+        palcoUI.getViewport().update(width, height, true);
     }
 
     @Override public void show() {}
     @Override public void hide() {}
     @Override public void pause() {}
     @Override public void resume() {}
-    @Override public void dispose() {
-        shapeRenderer.dispose();
-        uiStage.dispose();
+
+    @Override
+    public void dispose() {
+        desenhadorFormas.dispose();
+        palcoUI.dispose();
         skin.dispose();
     }
 }

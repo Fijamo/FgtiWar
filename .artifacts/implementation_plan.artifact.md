@@ -1,28 +1,46 @@
-# Implementation Plan - Android Mobile Controls and Character Details
+# Plano de Implementação - Refatoração para Português, Ajustes de UI e Menu
 
-This plan covers adding on-screen controls for Android and improving the character's visual representation.
+Este plano detalha a tradução do código para português, inclusão de comentários, ajustes nos botões móveis, melhoria no menu inicial e adição de controles de pausa e navegação.
 
-## Proposed Changes
+## Mudanças Propostas
 
-### Entities
+### Utilitários
+
+#### [MODIFY] [Constantes.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/utils/Constants.java)
+- Traduzir constantes: `LARGURA_V`, `ALTURA_V`, `VELOCIDADE_JOGADOR`, `FORCA_PULO`, `GRAVIDADE`.
+
+### Entidades
 
 #### [MODIFY] [Player.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/entities/Player.java)
-- Add boolean flags `movingLeft`, `movingRight`, and `shouldJump`.
-- Update `handleInput()` to check these flags in addition to keyboard keys.
-- Update `draw(ShapeRenderer)` to render a character with a head, torso, arms, and legs using geometric shapes.
+- Renomear variáveis: `posicao`, `velocidade`, `largura`, `altura`, `estaNoChao`, `movendoEsquerda`, `movendoDireita`.
+- Renomear métodos: `atualizar`, `processarEntrada`, `desenhar`, `pular`.
+- Adicionar comentários detalhados em português.
+- Implementar desenho do personagem com cabeça, tronco e membros (já solicitado anteriormente, manteremos a lógica refinada).
 
-### Screens
+### Telas (Screens)
+
+#### [MODIFY] [MainMenuScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/MainMenuScreen.java)
+- Exibir o nome do jogo: "A JORNADA DO ESTUDANTE DE TI".
+- Adicionar botão **JOGAR** centralizado.
+- Adicionar indicador/botão **NÍVEL: 1**.
+- Traduzir toda a lógica interna e adicionar comentários.
 
 #### [MODIFY] [GameScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/GameScreen.java)
-- Add a `Stage` and `InputMultiplexer` to handle both UI touch events and game logic.
-- Create on-screen buttons (Left, Right, Jump) using `TextButton` or simple `ImageButton` placeholders.
-- Link button touch events to the `Player` movement flags.
-- Update `render()` and `resize()` to draw and scale the UI stage.
+- **Controles Inferiores:**
+    - Manter botões direcionais (`<` e `>`) menores (aprox. 60x60).
+    - Remover botão de pulo da tela (o pulo continuará via teclado ou podemos adicionar uma área de toque invisível se necessário, mas por enquanto removeremos o botão físico).
+- **Controles Superiores (Nova Barra):**
+    - Adicionar botão **PAUSA** no topo.
+    - Adicionar botão **VOLTAR** no topo (retorna ao menu principal).
+- Renomear variáveis e métodos para português (ex: `palcoUI`, `criarInterface`, `renderizar`).
+- Adicionar comentários em português.
 
-## Verification Plan
+## Plano de Verificação
 
-### Manual Verification
-- Deploy to an Android device or emulator.
-- Verify that tapping/holding the Left and Right buttons moves the character.
-- Verify that tapping the Jump button makes the character jump.
-- Observe the new character appearance (head, limbs).
+### Verificação Manual
+- **Menu Inicial:** Verificar se o título, botão "JOGAR" e "NÍVEL: 1" estão visíveis e funcionais.
+- **Jogo:** 
+    - Verificar se os botões direcionais estão menores.
+    - Verificar se os botões "PAUSA" e "VOLTAR" aparecem no topo.
+    - Verificar se "VOLTAR" retorna ao menu.
+- **Código:** Revisar se 100% das funções, variáveis e comentários estão em português.

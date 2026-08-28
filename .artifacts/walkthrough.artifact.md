@@ -1,28 +1,27 @@
-# Walkthrough - Controles Mobile e Detalhes do Personagem
+# Walkthrough - Reorganização da UI e Controles de Pausa
 
-As melhorias para a versão Android e o design do personagem foram concluídas!
+Nesta etapa, focamos em melhorar a organização da interface e aprimorar a experiência de controle, especialmente para a versão mobile.
 
 ## Mudanças Realizadas
 
-### 1. Controles On-Screen (Mobile)
-Adicionei botões virtuais na tela de jogo para facilitar a jogabilidade em celulares:
-- **Botão < e >:** Localizados no canto inferior esquerdo para movimentação lateral.
-- **Botão PULO:** Localizado no canto inferior direito.
-- **Suporte Híbrido:** O jogo continua aceitando comandos de teclado (Setas e Espaço) simultaneamente aos toques na tela.
+### 1. Menu Inicial Mais Limpo
+Removi a informação de nível do menu principal ([MainMenuScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/MainMenuScreen.java)). Agora, o menu foca apenas no título **FGTIWAR** e no botão **JOGAR**.
 
-### 2. Novo Visual do Estudante
-O personagem deixou de ser apenas um retângulo azul e agora possui uma representação visual mais detalhada (proporcional, mas não muito grande):
-- **Cabeça:** Representada com cor de pele.
-- **Tronco:** Vestindo uma camisa azul.
-- **Pernas:** Calças pretas.
-- **Braços:** Visíveis ao lado do corpo.
+### 2. Interface de Jogo Reestruturada
+A tela de jogo ([GameScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/GameScreen.java)) passou por uma grande reorganização visual no topo:
+- **Canto Superior Esquerdo:** Botão **VOLTAR** (para retornar ao menu).
+- **Centro do Topo:** Texto **NIVEL: 1**, indicando claramente a fase atual.
+- **Canto Superior Direito:** Sistema de **PAUSA** e **PLAY** lado a lado.
 
-### 3. Ajustes Técnicos
-- Implementei um `InputMultiplexer` para garantir que o jogo processe tanto os toques nos botões da interface quanto outros inputs.
-- Criei uma `Skin` programática (sem necessidade de arquivos externos) para os botões, garantindo que funcionem em qualquer instalação.
+### 3. Sistema de Pausa Aprimorado
+Diferente da versão anterior, agora existem botões dedicados para pausar e retomar a partida:
+- **PAUSA:** Congela o movimento do estudante imediatamente.
+- **PLAY:** Retoma a física e o processamento do jogador.
 
 ## Como Testar
-1.  **No Android:** Toque e segure os botões de seta no canto da tela para mover o Estudante. Toque em "PULO" para saltar.
-2.  **No Personagem:** Observe que ele agora tem cabeça, braços e pernas bem definidos.
+1.  Inicie o jogo e note que o menu está mais minimalista.
+2.  Ao entrar na fase, verifique a nova barra superior.
+3.  Pressione **PAUSA** para interromper o jogo e **PLAY** para continuar.
+4.  Use o botão **VOLTAR** no canto esquerdo para sair da fase a qualquer momento.
 
-O código foi atualizado e está pronto para ser testado no seu dispositivo Android!
+Todas as funções continuam nomeadas em português e o código está totalmente comentado para facilitar seu estudo.

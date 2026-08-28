@@ -1,11 +1,11 @@
-# Tasks - Mobile Controls and Character Details
+# Tarefas - Reorganização da UI e Controle de Pausa
 
-- [x] Update Player Entity
-    - [x] Add movement flags to `Player.java`
-    - [x] Implement detailed rendering (head, arms, legs) in `Player.draw()`
-- [x] Implement Mobile UI in GameScreen
-    - [x] Add `Stage` for mobile controls
-    - [x] Create Left, Right, and Jump buttons
-    - [x] Update input handling to support touch buttons
-- [x] Verification
-    - [x] Verify movement and appearance on Android/Desktop
+- [x] Ajustar Menu Inicial
+    - [x] Remover "NIVEL: 1" de `MainMenuScreen.java`
+- [x] Reformular Interface da Tela de Jogo
+    - [x] Adicionar "NIVEL: 1" centralizado no topo em `GameScreen.java`
+    - [x] Mover botão "VOLTAR" para o canto superior esquerdo
+    - [x] Adicionar botão "PLAY" ao lado de "PAUSA" no canto superior direito
+    - [x] Implementar lógica de alternância entre Pausa e Play
+- [x] Verificação
+    - [x] Validar navegação e botões no Android/Desktop

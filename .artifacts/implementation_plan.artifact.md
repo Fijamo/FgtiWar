@@ -1,28 +1,31 @@
-# Implementation Plan - Android Mobile Controls and Character Details
+# Plano de Implementação - Reorganização da UI e Controle de Pausa
 
-This plan covers adding on-screen controls for Android and improving the character's visual representation.
+Este plano detalha a remoção da informação de nível do menu principal, sua adição na tela de jogo e a reestruturação dos botões de controle superiores.
 
-## Proposed Changes
+## Mudanças Propostas
 
-### Entities
+### Telas (Screens)
 
-#### [MODIFY] [Player.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/entities/Player.java)
-- Add boolean flags `movingLeft`, `movingRight`, and `shouldJump`.
-- Update `handleInput()` to check these flags in addition to keyboard keys.
-- Update `draw(ShapeRenderer)` to render a character with a head, torso, arms, and legs using geometric shapes.
-
-### Screens
+#### [MODIFY] [MainMenuScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/MainMenuScreen.java)
+- Remover o rótulo (Label) "NIVEL: 1" da interface do menu.
 
 #### [MODIFY] [GameScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/GameScreen.java)
-- Add a `Stage` and `InputMultiplexer` to handle both UI touch events and game logic.
-- Create on-screen buttons (Left, Right, Jump) using `TextButton` or simple `ImageButton` placeholders.
-- Link button touch events to the `Player` movement flags.
-- Update `render()` and `resize()` to draw and scale the UI stage.
+- **Informação de Nível:** Adicionar um rótulo "NIVEL: 1" na parte superior central da tela.
+- **Botão Voltar:** Mover o botão "VOLTAR" para o canto superior esquerdo.
+- **Botões de Pausa/Play:** 
+    - Adicionar o botão "PLAY" ao lado do botão "PAUSA".
+    - O botão "PAUSA" definirá o estado de pausa como verdadeiro.
+    - O botão "PLAY" definirá o estado de pausa como falso.
+- **Layout Superior:** Utilizar uma tabela estruturada para alinhar corretamente os elementos no topo da tela.
+- **Comentários:** Atualizar os comentários em português para refletir as novas funcionalidades.
 
-## Verification Plan
+## Plano de Verificação
 
-### Manual Verification
-- Deploy to an Android device or emulator.
-- Verify that tapping/holding the Left and Right buttons moves the character.
-- Verify that tapping the Jump button makes the character jump.
-- Observe the new character appearance (head, limbs).
+### Verificação Manual
+- **Menu Inicial:** Confirmar que o texto "NIVEL: 1" não aparece mais.
+- **Tela de Jogo:**
+    - Verificar se "VOLTAR" está no canto superior esquerdo.
+    - Verificar se "NIVEL: 1" está centralizado no topo.
+    - Verificar se os botões "PLAY" e "PAUSA" estão lado a lado no canto superior direito.
+    - Testar se o botão "PAUSA" congela o jogo e o botão "PLAY" retoma o movimento do estudante.
+    - Confirmar que o botão "VOLTAR" ainda funciona corretamente.

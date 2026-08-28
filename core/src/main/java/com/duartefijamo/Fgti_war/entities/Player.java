@@ -7,85 +7,118 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.duartefijamo.Fgti_war.utils.Constants;
 
+/**
+ * Representa o personagem principal do jogo (o Estudante).
+ * Controla a física, movimentação e renderização do personagem.
+ */
 public class Player {
-    private Vector2 position;
-    private Vector2 velocity;
-    private float width = 24;
-    private float height = 48;
-    private boolean isGrounded = false;
+    // Variáveis de posição e física
+    private Vector2 posicao;      // Posição (x, y) no mundo
+    private Vector2 velocidade;   // Velocidade atual (x, y)
+    private float largura = 24;   // Largura do corpo do personagem
+    private float altura = 48;    // Altura total do personagem
+    private boolean estaNoChao = false; // Indica se o personagem está tocando o chão
 
-    // Movement flags for mobile controls
-    public boolean movingLeft = false;
-    public boolean movingRight = false;
+    // Sinalizadores para controles mobile (botões na tela)
+    public boolean movendoEsquerda = false;
+    public boolean movendoDireita = false;
 
+    /**
+     * Construtor do Jogador.
+     * @param x Posição inicial no eixo X.
+     * @param y Posição inicial no eixo Y.
+     */
     public Player(float x, float y) {
-        position = new Vector2(x, y);
-        velocity = new Vector2(0, 0);
+        posicao = new Vector2(x, y);
+        velocidade = new Vector2(0, 0);
     }
 
-    public void update(float dt) {
-        handleInput();
+    /**
+     * Atualiza o estado do jogador a cada frame.
+     * @param dt Tempo decorrido desde o último frame (delta time).
+     */
+    public void atualizar(float dt) {
+        processarEntrada();
 
-        velocity.y += Constants.GRAVITY * dt;
-        position.add(velocity.x * dt, velocity.y * dt);
+        // Aplica a gravidade à velocidade vertical
+        velocidade.y += Constants.GRAVIDADE * dt;
 
-        // Simple ground collision
-        if (position.y <= 50) {
-            position.y = 50;
-            velocity.y = 0;
-            isGrounded = true;
+        // Aplica a velocidade à posição
+        posicao.add(velocidade.x * dt, velocidade.y * dt);
+
+        // Colisão simples com o chão (limitada à altura do cenário)
+        if (posicao.y <= 50) {
+            posicao.y = 50;
+            velocidade.y = 0;
+            estaNoChao = true;
         } else {
-            isGrounded = false;
+            estaNoChao = false;
         }
 
-        // Screen boundaries
-        if (position.x < 0) position.x = 0;
-        if (position.x > Constants.V_WIDTH - width) position.x = Constants.V_WIDTH - width;
-    }
-
-    private void handleInput() {
-        velocity.x = 0;
-
-        // Keyboard + Mobile flags
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || movingLeft) {
-            velocity.x = -Constants.PLAYER_SPEED;
+        // Garante que o jogador não saia pelas laterais da tela
+        if (posicao.x < 0) {
+            posicao.x = 0;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || movingRight) {
-            velocity.x = Constants.PLAYER_SPEED;
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && isGrounded) {
-            jump();
+        if (posicao.x > Constants.LARGURA_VIRTUAL - largura) {
+            posicao.x = Constants.LARGURA_VIRTUAL - largura;
         }
     }
 
-    public void jump() {
-        if (isGrounded) {
-            velocity.y = Constants.JUMP_FORCE;
+    /**
+     * Verifica as entradas de teclado e sinalizadores mobile para definir a velocidade.
+     */
+    private void processarEntrada() {
+        velocidade.x = 0; // Reseta a velocidade horizontal
+
+        // Movimento para esquerda (Teclado ou Botão Mobile)
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || movendoEsquerda) {
+            velocidade.x = -Constants.VELOCIDADE_JOGADOR;
+        }
+
+        // Movimento para direita (Teclado ou Botão Mobile)
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || movendoDireita) {
+            velocidade.x = Constants.VELOCIDADE_JOGADOR;
+        }
+
+        // Comando de pulo (Apenas teclado ou chamado via função pular())
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && estaNoChao) {
+            pular();
         }
     }
 
-    public void draw(ShapeRenderer shapeRenderer) {
-        float x = position.x;
-        float y = position.y;
+    /**
+     * Executa a ação de pular se o personagem estiver no chão.
+     */
+    public void pular() {
+        if (estaNoChao) {
+            velocidade.y = Constants.FORCA_PULO;
+        }
+    }
 
-        shapeRenderer.setColor(Color.BROWN); // Skin/Head color
-        // Head
-        shapeRenderer.rect(x + 4, y + 36, 16, 12);
+    /**
+     * Desenha o personagem usando formas geométricas.
+     * @param desenhador Ferramenta de desenho de formas.
+     */
+    public void desenhar(ShapeRenderer desenhador) {
+        float x = posicao.x;
+        float y = posicao.y;
 
-        shapeRenderer.setColor(Color.BLUE); // Shirt/Torso
-        // Torso
-        shapeRenderer.rect(x + 4, y + 16, 16, 20);
+        // Desenha a Cabeça
+        desenhador.setColor(Color.BROWN);
+        desenhador.rect(x + 4, y + 36, 16, 12);
 
-        shapeRenderer.setColor(Color.BLACK); // Pants/Legs
-        // Left Leg
-        shapeRenderer.rect(x + 4, y, 6, 16);
-        // Right Leg
-        shapeRenderer.rect(x + 14, y, 6, 16);
+        // Desenha o Tronco (Camisa)
+        desenhador.setColor(Color.BLUE);
+        desenhador.rect(x + 4, y + 16, 16, 20);
 
-        shapeRenderer.setColor(Color.BROWN);
-        // Left Arm
-        shapeRenderer.rect(x - 2, y + 20, 6, 12);
-        // Right Arm
-        shapeRenderer.rect(x + 20, y + 20, 6, 12);
+        // Desenha as Pernas (Calças)
+        desenhador.setColor(Color.BLACK);
+        desenhador.rect(x + 4, y, 6, 16);    // Perna Esquerda
+        desenhador.rect(x + 14, y, 6, 16);   // Perna Direita
+
+        // Desenha os Braços
+        desenhador.setColor(Color.BROWN);
+        desenhador.rect(x - 2, y + 20, 6, 12); // Braço Esquerdo
+        desenhador.rect(x + 20, y + 20, 6, 12); // Braço Direito
     }
 }

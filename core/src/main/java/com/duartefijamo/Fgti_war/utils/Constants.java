@@ -13,4 +13,8 @@ public class Constants {
     public static final float VELOCIDADE_JOGADOR = 300f; // Velocidade de movimento lateral
     public static final float FORCA_PULO = 800f;         // Força aplicada no salto
     public static final float GRAVIDADE = -2000f;        // Força da gravidade constante
+
+    // Configurações do cenário
+    public static final float ALTURA_CHAO = 30f;        // Altura da grama (mais fina)
+    public static final float MARGEM_LATERAL = 20f;     // Espaço vazio nos cantos da tela
 }

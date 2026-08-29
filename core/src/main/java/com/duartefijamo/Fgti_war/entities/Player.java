@@ -46,21 +46,21 @@ public class Player {
         // Aplica a velocidade à posição
         posicao.add(velocidade.x * dt, velocidade.y * dt);
 
-        // Colisão simples com o chão (limitada à altura do cenário)
-        if (posicao.y <= 50) {
-            posicao.y = 50;
+        // Colisão simples com o chão (limitada à altura do cenário definida em Constantes)
+        if (posicao.y <= Constants.ALTURA_CHAO) {
+            posicao.y = Constants.ALTURA_CHAO;
             velocidade.y = 0;
             estaNoChao = true;
         } else {
             estaNoChao = false;
         }
 
-        // Garante que o jogador não saia pelas laterais da tela
-        if (posicao.x < 0) {
-            posicao.x = 0;
+        // Garante que o jogador não saia das bordas da grama (quase o final da tela)
+        if (posicao.x < Constants.MARGEM_LATERAL) {
+            posicao.x = Constants.MARGEM_LATERAL;
         }
-        if (posicao.x > Constants.LARGURA_VIRTUAL - largura) {
-            posicao.x = Constants.LARGURA_VIRTUAL - largura;
+        if (posicao.x > Constants.LARGURA_VIRTUAL - Constants.MARGEM_LATERAL - largura) {
+            posicao.x = Constants.LARGURA_VIRTUAL - Constants.MARGEM_LATERAL - largura;
         }
     }
 

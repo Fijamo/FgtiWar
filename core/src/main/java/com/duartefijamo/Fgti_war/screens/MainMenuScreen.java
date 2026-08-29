@@ -96,10 +96,21 @@ public class MainMenuScreen implements Screen {
             }
         });
 
+        // Botão Sair
+        TextButton botaoSair = new TextButton("SAIR", skin, "padrao");
+        botaoSair.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Fecha o aplicativo
+                Gdx.app.exit();
+            }
+        });
+
         // Adiciona os elementos à tabela organizados em linhas
         tabela.add(titulo).padBottom(30).row();
         tabela.add(menuTexto).padBottom(20).row();
-        tabela.add(botaoJogar).size(200, 60).padBottom(20);
+        tabela.add(botaoJogar).size(200, 60).padBottom(10).row();
+        tabela.add(botaoSair).size(200, 60).padBottom(20);
     }
 
     @Override

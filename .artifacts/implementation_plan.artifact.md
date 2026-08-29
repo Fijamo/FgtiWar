@@ -1,31 +1,28 @@
-# Plano de Implementação - Reorganização da UI e Controle de Pausa
+# Plano de Implementação - Ajuste Fino da Grama (Chão)
 
-Este plano detalha a remoção da informação de nível do menu principal, sua adição na tela de jogo e a reestruturação dos botões de controle superiores.
+Este plano visa ajustar a geometria do chão (grama verde) para que seja menos espesso verticalmente e não ocupe a largura total da tela, criando um efeito de plataforma centralizada.
 
 ## Mudanças Propostas
 
+### Utilitários
+
+#### [MODIFY] [Constants.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/utils/Constants.java)
+- Alterar `ALTURA_CHAO` de 80 para 40.
+
+### Entidades
+
+#### [MODIFY] [Player.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/entities/Player.java)
+- Atualizar a lógica de colisão para que o jogador apenas fique "no chão" se estiver dentro dos limites horizontais da grama (entre 10 e 790 pixels).
+- Se o jogador sair das bordas, ele deve cair (a gravidade o puxará para baixo da tela).
+
 ### Telas (Screens)
 
-#### [MODIFY] [MainMenuScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/MainMenuScreen.java)
-- Remover o rótulo (Label) "NIVEL: 1" da interface do menu.
-
 #### [MODIFY] [GameScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/GameScreen.java)
-- **Informação de Nível:** Adicionar um rótulo "NIVEL: 1" na parte superior central da tela.
-- **Botão Voltar:** Mover o botão "VOLTAR" para o canto superior esquerdo.
-- **Botões de Pausa/Play:** 
-    - Adicionar o botão "PLAY" ao lado do botão "PAUSA".
-    - O botão "PAUSA" definirá o estado de pausa como verdadeiro.
-    - O botão "PLAY" definirá o estado de pausa como falso.
-- **Layout Superior:** Utilizar uma tabela estruturada para alinhar corretamente os elementos no topo da tela.
-- **Comentários:** Atualizar os comentários em português para refletir as novas funcionalidades.
+- Alterar o desenho do retângulo da grama: `desenhadorFormas.rect(10, 0, 780, Constants.ALTURA_CHAO)`.
+- Isso cria uma margem de 10 pixels em cada lado da tela (800 - 20 = 780).
 
 ## Plano de Verificação
 
 ### Verificação Manual
-- **Menu Inicial:** Confirmar que o texto "NIVEL: 1" não aparece mais.
-- **Tela de Jogo:**
-    - Verificar se "VOLTAR" está no canto superior esquerdo.
-    - Verificar se "NIVEL: 1" está centralizado no topo.
-    - Verificar se os botões "PLAY" e "PAUSA" estão lado a lado no canto superior direito.
-    - Testar se o botão "PAUSA" congela o jogo e o botão "PLAY" retoma o movimento do estudante.
-    - Confirmar que o botão "VOLTAR" ainda funciona corretamente.
+- **Visual:** Confirmar que a grama está mais fina (40px) e que existem pequenos espaços vazios nos cantos esquerdo e direito.
+- **Física:** Verificar se o personagem caminha sobre a grama e se ele cai no "buraco" caso chegue ao final das bordas laterais.

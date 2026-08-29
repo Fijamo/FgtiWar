@@ -1,27 +1,27 @@
-# Walkthrough - Reorganização da UI e Controles de Pausa
+# Walkthrough - Ajuste Fino da Grama e Movimento
 
-Nesta etapa, focamos em melhorar a organização da interface e aprimorar a experiência de controle, especialmente para a versão mobile.
+Fiz os ajustes solicitados na grama e na movimentação do personagem para garantir que ele não caia e respeite os limites visuais.
 
 ## Mudanças Realizadas
 
-### 1. Menu Inicial Mais Limpo
-Removi a informação de nível do menu principal ([MainMenuScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/MainMenuScreen.java)). Agora, o menu foca apenas no título **FGTIWAR** e no botão **JOGAR**.
+### 1. Novo Botão no Menu
+- **Botão SAIR:** Adicionei o botão para fechar o aplicativo diretamente do menu inicial. Ao clicar nele, o jogo é encerrado corretamente.
 
-### 2. Interface de Jogo Reestruturada
-A tela de jogo ([GameScreen.java](file:///C:/Users/alvar/Desktop/All/11111FACULDADE/Chande/FgtiWar/core/src/main/java/com/duartefijamo/Fgti_war/screens/GameScreen.java)) passou por uma grande reorganização visual no topo:
-- **Canto Superior Esquerdo:** Botão **VOLTAR** (para retornar ao menu).
-- **Centro do Topo:** Texto **NIVEL: 1**, indicando claramente a fase atual.
-- **Canto Superior Direito:** Sistema de **PAUSA** e **PLAY** lado a lado.
+### 2. Visual da Grama (Chão)
+- **Altura Reduzida:** A grama agora é mais fina (baixei para **30 pixels** de altura), deixando o cenário mais elegante.
+- **Comprimento Ajustado:** A grama não ocupa mais 100% da largura. Adicionei uma margem de **20 pixels** em cada lado, fazendo com que ela termine "quase no final da tela".
 
-### 3. Sistema de Pausa Aprimorado
-Diferente da versão anterior, agora existem botões dedicados para pausar e retomar a partida:
-- **PAUSA:** Congela o movimento do estudante imediatamente.
-- **PLAY:** Retoma a física e o processamento do jogador.
+### 2. Bloqueio de Movimento (Sem Quedas)
+- Conforme solicitado, o **Estudante** agora está bloqueado pelos limites da grama. 
+- Se você tentar andar para fora da parte verde, o personagem irá parar exatamente na borda. **Ele não cai mais no vazio**, garantindo que ele ande apenas onde há grama.
+
+### 3. Sincronização de Física
+- A colisão foi ajustada para a nova altura de 30 pixels.
+- Os limites laterais de movimento agora usam a mesma constante da grama (`MARGEM_LATERAL`), garantindo que se você mudar o tamanho da grama no futuro, o limite de movimento do personagem mudará automaticamente.
 
 ## Como Testar
-1.  Inicie o jogo e note que o menu está mais minimalista.
-2.  Ao entrar na fase, verifique a nova barra superior.
-3.  Pressione **PAUSA** para interromper o jogo e **PLAY** para continuar.
-4.  Use o botão **VOLTAR** no canto esquerdo para sair da fase a qualquer momento.
+1.  Tente levar o personagem até o canto esquerdo ou direito da tela. 
+2.  Observe que ele para antes de sair da grama verde.
+3.  Note que a grama está mais baixa e não toca as bordas da tela.
 
-Todas as funções continuam nomeadas em português e o código está totalmente comentado para facilitar seu estudo.
+Tudo continua devidamente comentado e em português!

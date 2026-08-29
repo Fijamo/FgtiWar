@@ -189,9 +189,11 @@ public class GameScreen implements Screen {
 
         desenhadorFormas.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Desenha o Chão (Verde)
+        // Desenha o Chão (Grama Verde) - Começa um pouco depois do início e vai até quase o fim
         desenhadorFormas.setColor(Color.GREEN);
-        desenhadorFormas.rect(0, 0, Constants.LARGURA_VIRTUAL, 50);
+        desenhadorFormas.rect(Constants.MARGEM_LATERAL, 0,
+                             Constants.LARGURA_VIRTUAL - (Constants.MARGEM_LATERAL * 2),
+                             Constants.ALTURA_CHAO);
 
         // Desenha o Jogador
         jogador.desenhar(desenhadorFormas);

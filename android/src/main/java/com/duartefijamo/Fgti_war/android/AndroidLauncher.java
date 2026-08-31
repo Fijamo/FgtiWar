@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.duartefijamo.Fgti_war.FgtiWar;
 
 /** Launches the Android application. */
+// Testando a interação do projecto, na branch principal
 public class AndroidLauncher extends AndroidApplication {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

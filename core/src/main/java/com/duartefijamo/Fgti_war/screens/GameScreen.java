@@ -38,6 +38,9 @@ public class GameScreen implements Screen {
     private Skin skin;
     private boolean pausado = false; // Controle de estado de pausa
 
+    // Textura para o cenário de fundo
+    private Texture texturaCenario;
+
     /**
      * Construtor da tela de jogo.
      * @param jogo Instância principal do jogo.
@@ -48,6 +51,9 @@ public class GameScreen implements Screen {
         viewport = new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL, camera);
         desenhadorFormas = new ShapeRenderer();
         jogador = new Player(100, 100);
+
+        // Carrega a imagem do cenário (Laboratório)
+        texturaCenario = new Texture("05_Laboratorio_de_Informatica.png");
 
         criarInterface();
     }
@@ -72,6 +78,7 @@ public class GameScreen implements Screen {
 
         TextButton botaoEsquerda = new TextButton("<", skin);
         TextButton botaoDireita = new TextButton(">", skin);
+        TextButton botaoSaltar = new TextButton("SALTAR", skin);
 
         // Configura ouvintes de toque para os botões direcionais
         botaoEsquerda.addListener(new InputListener() {
@@ -98,9 +105,19 @@ public class GameScreen implements Screen {
             }
         });
 
-        // Adiciona botões à tabela (tamanho reduzido para 60x60)
+        botaoSaltar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                jogador.pular();
+            }
+        });
+
+        // Adiciona botões à tabela (Seta Esquerda, Seta Direita ... Espaço ... Saltar)
         tabelaControles.add(botaoEsquerda).size(60, 60).pad(10);
         tabelaControles.add(botaoDireita).size(60, 60).pad(10);
+        tabelaControles.add().expandX(); // Empurra o botão saltar para a direita
+        tabelaControles.add(botaoSaltar).size(100, 60).pad(10);
+
         palcoUI.addActor(tabelaControles);
 
         // Tabela para elementos do topo (Voltar, Nível, Pausa/Play)
@@ -179,28 +196,37 @@ public class GameScreen implements Screen {
             jogador.atualizar(delta);
         }
 
-        // Limpa a tela com cor azul céu
-        Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);
+        // Limpa a tela
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Atualiza a câmera e desenha o mundo
+        // Atualiza a posição da câmera para seguir o jogador (com limites do mundo)
+        float cameraX = jogador.getPosicao().x + 32;
+        float meiaLarguraTela = Constants.LARGURA_VIRTUAL / 2f;
+        if (cameraX < meiaLarguraTela) {
+            cameraX = meiaLarguraTela;
+        } else if (cameraX > Constants.LARGURA_MUNDO - meiaLarguraTela) {
+            cameraX = Constants.LARGURA_MUNDO - meiaLarguraTela;
+        }
+        camera.position.x = cameraX;
+        camera.position.y = Constants.ALTURA_VIRTUAL / 2f;
         camera.update();
-        desenhadorFormas.setProjectionMatrix(camera.combined);
 
-        desenhadorFormas.begin(ShapeRenderer.ShapeType.Filled);
+        // --- 1. Renderização de Texturas (Cenário e Jogador) ---
+        jogo.batch.setProjectionMatrix(camera.combined);
+        jogo.batch.begin();
 
-        // Desenha o Chão (Grama Verde) - Começa um pouco depois do início e vai até quase o fim
-        desenhadorFormas.setColor(Color.GREEN);
-        desenhadorFormas.rect(Constants.MARGEM_LATERAL, 0,
-                             Constants.LARGURA_VIRTUAL - (Constants.MARGEM_LATERAL * 2),
-                             Constants.ALTURA_CHAO);
+        // Desenha o cenário de fundo repetido 3 vezes para cobrir a largura do mundo
+        for (int i = 0; i < 3; i++) {
+            jogo.batch.draw(texturaCenario, i * Constants.LARGURA_VIRTUAL, 0, Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL);
+        }
 
-        // Desenha o Jogador
-        jogador.desenhar(desenhadorFormas);
+        // Desenha o jogador com sua animação atual
+        jogador.desenhar(jogo.batch);
 
-        desenhadorFormas.end();
+        jogo.batch.end();
 
-        // Atualiza e desenha os botões da interface
+        // --- 2. Renderização da Interface ---
         palcoUI.act(delta);
         palcoUI.draw();
     }
@@ -221,5 +247,7 @@ public class GameScreen implements Screen {
         desenhadorFormas.dispose();
         palcoUI.dispose();
         skin.dispose();
+        texturaCenario.dispose();
+        jogador.liberarRecursos();
     }
 }

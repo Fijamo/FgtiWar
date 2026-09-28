@@ -4,12 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -27,6 +27,10 @@ public class MainMenuScreen implements Screen {
     private Stage palco;
     private Skin skin;
 
+    // Texturas para o fundo e logo
+    private Texture texturaFundo;
+    private Texture texturaLogo;
+
     /**
      * Construtor do Menu.
      * @param jogo Instância principal do jogo.
@@ -37,6 +41,10 @@ public class MainMenuScreen implements Screen {
         palco = new Stage(new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL));
         // Define o palco para receber entradas (toques/cliques)
         Gdx.input.setInputProcessor(palco);
+
+        // Carrega as novas texturas
+        texturaFundo = new Texture("01_Entrada_da_Universidade.png");
+        texturaLogo = new Texture("FGTI_WAR_Logo.png");
 
         criarSkin();
         criarInterface();
@@ -65,26 +73,42 @@ public class MainMenuScreen implements Screen {
         estiloBotao.font = skin.getFont("padrao");
         skin.add("padrao", estiloBotao);
 
-        // Define o estilo dos rótulos (Labels)
+        // Define o estilo dos rótulos (Labels) padrão
         Label.LabelStyle estiloLabel = new Label.LabelStyle();
         estiloLabel.font = skin.getFont("padrao");
         skin.add("padrao", estiloLabel);
+
+        // Define estilo para rótulo preto no topo
+        Label.LabelStyle estiloLabelPreto = new Label.LabelStyle();
+        estiloLabelPreto.font = skin.getFont("padrao");
+        estiloLabelPreto.fontColor = Color.BLACK;
+        skin.add("preto", estiloLabelPreto);
     }
 
     /**
-     * Organiza os elementos visuais na tela usando uma tabela.
+     * Organiza os elementos visuais na tela usando tabelas.
      */
     private void criarInterface() {
-        Table tabela = new Table();
-        tabela.setFillParent(true); // Faz a tabela ocupar a tela inteira
-        palco.addActor(tabela);
+        // Adiciona a imagem de fundo primeiro para ficar atrás de tudo
+        Image fundo = new Image(texturaFundo);
+        fundo.setSize(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL);
+        palco.addActor(fundo);
 
-        // Título do Jogo
-        Label titulo = new Label("FGTIWAR", skin, "padrao");
-        titulo.setFontScale(2.0f); // Deixa o título maior
+        // Tabela do Topo para o título "MENU"
+        Table tabelaTopo = new Table();
+        tabelaTopo.top().setFillParent(true);
+        palco.addActor(tabelaTopo);
 
-        // Texto do Menu
-        Label menuTexto = new Label("MENU", skin, "padrao");
+        Label menuTexto = new Label("MENU", skin, "preto");
+        tabelaTopo.add(menuTexto).padTop(15).top();
+
+        // Tabela Central para Logo e Botões
+        Table tabelaCentro = new Table();
+        tabelaCentro.center().setFillParent(true);
+        palco.addActor(tabelaCentro);
+
+        // Logo do Jogo
+        Image logo = new Image(texturaLogo);
 
         // Botão Jogar
         TextButton botaoJogar = new TextButton("JOGAR", skin, "padrao");
@@ -106,17 +130,16 @@ public class MainMenuScreen implements Screen {
             }
         });
 
-        // Adiciona os elementos à tabela organizados em linhas
-        tabela.add(titulo).padBottom(30).row();
-        tabela.add(menuTexto).padBottom(20).row();
-        tabela.add(botaoJogar).size(200, 60).padBottom(10).row();
-        tabela.add(botaoSair).size(200, 60).padBottom(20);
+        // Adiciona os elementos à tabela central
+        tabelaCentro.add(logo).size(400, 200).padBottom(30).row();
+        tabelaCentro.add(botaoJogar).size(200, 60).padBottom(15).row();
+        tabelaCentro.add(botaoSair).size(200, 60);
     }
 
     @Override
     public void render(float delta) {
-        // Limpa a tela com uma cor azul escura
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        // Limpa a tela
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Desenha os elementos do palco
@@ -138,5 +161,7 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         palco.dispose();
         skin.dispose();
+        texturaFundo.dispose();
+        texturaLogo.dispose();
     }
 }

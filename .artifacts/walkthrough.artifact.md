@@ -1,27 +1,30 @@
-# Walkthrough - Ajuste Fino da Grama e Movimento
+# Walkthrough - Character Animations & 3x Scrolling Background
 
-Fiz os ajustes solicitados na grama e na movimentação do personagem para garantir que ele não caia e respeite os limites visuais.
+Successfully implemented complete sprite sheet animation handling and scrolling world background for FgtiWar.
 
-## Mudanças Realizadas
+## Changes Made
 
-### 1. Novo Botão no Menu
-- **Botão SAIR:** Adicionei o botão para fechar o aplicativo diretamente do menu inicial. Ao clicar nele, o jogo é encerrado corretamente.
+### 1. Constants (`Constants.java`)
+- Added `LARGURA_MUNDO = LARGURA_VIRTUAL * 3f` (2400 pixels) to define an expanded game world.
 
-### 2. Visual da Grama (Chão)
-- **Altura Reduzida:** A grama agora é mais fina (baixei para **30 pixels** de altura), deixando o cenário mais elegante.
-- **Comprimento Ajustado:** A grama não ocupa mais 100% da largura. Adicionei uma margem de **20 pixels** em cada lado, fazendo com que ela termine "quase no final da tela".
+### 2. Player Animations & States (`Player.java`)
+- Implemented automatic slicing of horizontal sprite sheets into individual frames using `TextureRegion.split()` and LibGDX `Animation`.
+- Added support for all character states:
+  - `Idle` (Parado)
+  - `Walk` (Andando)
+  - `Run` (Correndo com Shift)
+  - `Jump` (Saltando)
+  - `Attack` (Atacando - Teclas A/Z)
+  - `Hurt` (Ferido)
+  - `Dead` (Morto)
+  - `Shield` (Defendendo - Tecla S)
+- Added horizontal flip support based on movement direction and world boundary constraints (`[0, LARGURA_MUNDO - largura]`).
 
-### 2. Bloqueio de Movimento (Sem Quedas)
-- Conforme solicitado, o **Estudante** agora está bloqueado pelos limites da grama. 
-- Se você tentar andar para fora da parte verde, o personagem irá parar exatamente na borda. **Ele não cai mais no vazio**, garantindo que ele ande apenas onde há grama.
+### 3. Scrolling Camera & Background (`GameScreen.java`)
+- Configured the camera to follow the player horizontally across the 2400-pixel world, clamped within the world boundaries.
+- Rendered the background texture (`05_Laboratorio_de_Informatica.png`) repeated 3 times across the world (`i * LARGURA_VIRTUAL`) for continuous scrolling when the player moves.
 
-### 3. Sincronização de Física
-- A colisão foi ajustada para a nova altura de 30 pixels.
-- Os limites laterais de movimento agora usam a mesma constante da grama (`MARGEM_LATERAL`), garantindo que se você mudar o tamanho da grama no futuro, o limite de movimento do personagem mudará automaticamente.
+## Verification Results
 
-## Como Testar
-1.  Tente levar o personagem até o canto esquerdo ou direito da tela. 
-2.  Observe que ele para antes de sair da grama verde.
-3.  Note que a grama está mais baixa e não toca as bordas da tela.
-
-Tudo continua devidamente comentado e em português!
+### Automated Tests
+- Gradle build (`classes`) finished successfully with zero compilation errors.

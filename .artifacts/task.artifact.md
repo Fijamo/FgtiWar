@@ -1,6 +1,6 @@
-# Tarefas - Reorganização da UI e Controle de Pausa
+# Task List
 
-- [x] Ajuste Fino da Grama
-    - [x] Reduzir altura da grama para 30px
-    - [x] Adicionar margem lateral de 20px (quase o final da tela)
-    - [x] Impedir jogador de sair da grama (sem queda)
+- [x] Update Constants.java with LARGURA_MUNDO
+- [x] Update Player.java to load and manage sprite sheet animations (Idle, Walk, Run, Jump, Attack, Hurt, Dead, Shield)
+- [x] Update GameScreen.java for camera tracking and 3x repeating background
+- [x] Build and verify compilation with Gradle

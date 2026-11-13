@@ -3,223 +3,182 @@ package com.duartefijamo.Fgti_war.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.duartefijamo.Fgti_war.FgtiWar;
-import com.duartefijamo.Fgti_war.entities.Player;
+import com.duartefijamo.Fgti_war.assets.GameAssets;
+import com.duartefijamo.Fgti_war.ui.HUD;
+import com.duartefijamo.Fgti_war.ui.PauseOverlay;
 import com.duartefijamo.Fgti_war.utils.Constants;
+import com.duartefijamo.Fgti_war.world.GameWorld;
 
 /**
- * Tela principal do jogo (Fase 1).
- * Gerencia a renderização do mundo, do jogador e da interface de usuário (UI).
+ * Tela principal de gameplay do jogo FgtiWar.
+ * Gerencia a renderização do mapa de tiles, câmera com movimento suave e travamento nos limites,
+ * fundo parallax, atualização de entidades e interface de usuário (HUD/Pausa).
  */
 public class GameScreen implements Screen {
+
     private final FgtiWar jogo;
+    private final int numeroFase;
+
     private OrthographicCamera camera;
     private FitViewport viewport;
-    private ShapeRenderer desenhadorFormas;
-    private Player jogador;
 
-    private Stage palcoUI; // Palco para os botões de controle
-    private Skin skin;
-    private boolean pausado = false; // Controle de estado de pausa
+    private GameAssets assets;
+    private GameWorld world;
+    private OrthogonalTiledMapRenderer mapRenderer;
 
-    /**
-     * Construtor da tela de jogo.
-     * @param jogo Instância principal do jogo.
-     */
+    private HUD hud;
+    private PauseOverlay pauseOverlay;
+    private boolean pausado = false;
+
     public GameScreen(FgtiWar jogo) {
-        this.jogo = jogo;
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL, camera);
-        desenhadorFormas = new ShapeRenderer();
-        jogador = new Player(100, 100);
-
-        criarInterface();
+        this(jogo, 1);
     }
 
-    /**
-     * Cria a interface de usuário com botões direcionais e controles de navegação.
-     */
-    private void criarInterface() {
-        palcoUI = new Stage(new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL));
+    public GameScreen(FgtiWar jogo, int numeroFase) {
+        this.jogo = jogo;
+        this.numeroFase = numeroFase;
 
-        // Permite que o palco processe toques na tela
-        InputMultiplexer multiplexador = new InputMultiplexer();
-        multiplexador.addProcessor(palcoUI);
-        Gdx.input.setInputProcessor(multiplexador);
+        inicializarComponentes();
+    }
 
-        prepararSkin();
+    private void inicializarComponentes() {
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL, camera);
 
-        // Tabela para botões direcionais (Canto inferior esquerdo)
-        Table tabelaControles = new Table();
-        tabelaControles.left().bottom();
-        tabelaControles.setFillParent(true);
+        assets = new GameAssets();
+        world = new GameWorld(numeroFase, assets);
 
-        TextButton botaoEsquerda = new TextButton("<", skin);
-        TextButton botaoDireita = new TextButton(">", skin);
+        mapRenderer = new OrthogonalTiledMapRenderer(world.getLevelMap().getTiledMap(), 1f, jogo.batch);
 
-        // Configura ouvintes de toque para os botões direcionais
-        botaoEsquerda.addListener(new InputListener() {
+        hud = new HUD(world.getPlayer(), assets);
+
+        pauseOverlay = new PauseOverlay(new PauseOverlay.PauseListener() {
             @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                jogador.movendoEsquerda = true;
-                return true;
+            public void onResume() {
+                pausado = false;
+                configurarProcessadorEntrada();
             }
+
             @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                jogador.movendoEsquerda = false;
+            public void onRestart() {
+                jogo.setScreen(new GameScreen(jogo, numeroFase));
             }
-        });
 
-        botaoDireita.addListener(new InputListener() {
             @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                jogador.movendoDireita = true;
-                return true;
-            }
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                jogador.movendoDireita = false;
-            }
-        });
-
-        // Adiciona botões à tabela (tamanho reduzido para 60x60)
-        tabelaControles.add(botaoEsquerda).size(60, 60).pad(10);
-        tabelaControles.add(botaoDireita).size(60, 60).pad(10);
-        palcoUI.addActor(tabelaControles);
-
-        // Tabela para elementos do topo (Voltar, Nível, Pausa/Play)
-        Table tabelaTopo = new Table();
-        tabelaTopo.top().setFillParent(true);
-        palcoUI.addActor(tabelaTopo);
-
-        // Botão Voltar (Canto superior esquerdo)
-        TextButton botaoVoltar = new TextButton("VOLTAR", skin);
-        botaoVoltar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public void onMainMenu() {
                 jogo.setScreen(new MainMenuScreen(jogo));
             }
         });
 
-        // Informação de Nível (Centralizado no topo)
-        Label nivelLabel = new Label("NIVEL: 1", skin, "padrao");
-
-        // Botões de Pausa e Play (Canto superior direito)
-        Table tabelaPausaPlay = new Table();
-        TextButton botaoPausa = new TextButton("PAUSA", skin);
-        TextButton botaoPlay = new TextButton("PLAY", skin);
-
-        botaoPausa.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                pausado = true;
-            }
-        });
-
-        botaoPlay.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                pausado = false;
-            }
-        });
-
-        tabelaPausaPlay.add(botaoPausa).size(70, 40).padRight(5);
-        tabelaPausaPlay.add(botaoPlay).size(70, 40);
-
-        // Organiza a linha do topo: Voltar | Nível | Pausa+Play
-        tabelaTopo.add(botaoVoltar).size(80, 40).pad(10).left();
-        tabelaTopo.add(nivelLabel).expandX().center();
-        tabelaTopo.add(tabelaPausaPlay).pad(10).right();
+        configurarProcessadorEntrada();
     }
 
-    /**
-     * Define o estilo visual dos botões e textos.
-     */
-    private void prepararSkin() {
-        skin = new Skin();
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.WHITE);
-        pixmap.fill();
-        skin.add("branco", new Texture(pixmap));
-
-        BitmapFont fonte = new BitmapFont();
-        skin.add("padrao", fonte);
-
-        TextButton.TextButtonStyle estiloBotao = new TextButton.TextButtonStyle();
-        estiloBotao.up = skin.newDrawable("branco", Color.DARK_GRAY);
-        estiloBotao.down = skin.newDrawable("branco", Color.NAVY);
-        estiloBotao.font = skin.getFont("padrao");
-        skin.add("default", estiloBotao);
-
-        Label.LabelStyle estiloLabel = new Label.LabelStyle();
-        estiloLabel.font = skin.getFont("padrao");
-        skin.add("padrao", estiloLabel);
+    private void configurarProcessadorEntrada() {
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        if (pausado) {
+            multiplexer.addProcessor(pauseOverlay.getStage());
+        } else {
+            multiplexer.addProcessor(hud.getStage());
+        }
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override
     public void render(float delta) {
-        // Se não estiver pausado, atualiza a lógica do jogador
-        if (!pausado) {
-            jogador.atualizar(delta);
+        // Verifica botão de pausa no HUD
+        if (hud.isPausePressed()) {
+            hud.resetPausePressed();
+            pausado = true;
+            configurarProcessadorEntrada();
         }
 
-        // Limpa a tela com cor azul céu
-        Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);
+        if (!pausado) {
+            world.update(delta);
+            atualizarCamera();
+
+            // Condições de término da fase
+            if (world.isGameOver()) {
+                jogo.setScreen(new GameOverScreen(jogo, numeroFase));
+                return;
+            } else if (world.isLevelCompleted()) {
+                jogo.setScreen(new VictoryScreen(jogo, numeroFase, world.getScoreECTS()));
+                return;
+            }
+        }
+
+        // Limpa a tela
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.15f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Atualiza a câmera e desenha o mundo
+        // 1. Renderiza Parallax de Fundo
+        jogo.batch.setProjectionMatrix(camera.combined);
+        jogo.batch.begin();
+        world.drawParallax(jogo.batch, camera);
+        jogo.batch.end();
+
+        // 2. Renderiza Mapa de Tiles
         camera.update();
-        desenhadorFormas.setProjectionMatrix(camera.combined);
+        mapRenderer.setView(camera);
+        mapRenderer.render();
 
-        desenhadorFormas.begin(ShapeRenderer.ShapeType.Filled);
+        // 3. Renderiza Entidades (Jogador, Inimigos, Objetos)
+        jogo.batch.begin();
+        world.drawEntities(jogo.batch, assets);
+        jogo.batch.end();
 
-        // Desenha o Chão (Grama Verde) - Começa um pouco depois do início e vai até quase o fim
-        desenhadorFormas.setColor(Color.GREEN);
-        desenhadorFormas.rect(Constants.MARGEM_LATERAL, 0,
-                             Constants.LARGURA_VIRTUAL - (Constants.MARGEM_LATERAL * 2),
-                             Constants.ALTURA_CHAO);
+        // 4. Renderiza Interface
+        hud.update(world.getScoreECTS(), world.hasKey());
+        hud.draw(jogo.batch, assets, world.getPlayer().getVidaAtual(), world.getPlayer().getVidaMax());
 
-        // Desenha o Jogador
-        jogador.desenhar(desenhadorFormas);
+        if (pausado) {
+            pauseOverlay.draw();
+        }
+    }
 
-        desenhadorFormas.end();
+    private void atualizarCamera() {
+        float playerX = world.getPlayer().getPosicao().x;
+        float playerY = world.getPlayer().getPosicao().y;
 
-        // Atualiza e desenha os botões da interface
-        palcoUI.act(delta);
-        palcoUI.draw();
+        // Movimento suave da câmera (lerp)
+        float targetX = MathUtils.lerp(camera.position.x, playerX, 0.1f);
+        float targetY = MathUtils.lerp(camera.position.y, playerY + 32, 0.1f);
+
+        // Trava a câmera dentro dos limites do mapa
+        float minX = camera.viewportWidth / 2f;
+        float maxX = world.getLevelMap().getLarguraTotalPixels() - (camera.viewportWidth / 2f);
+
+        float minY = camera.viewportHeight / 2f;
+        float maxY = world.getLevelMap().getAlturaTotalPixels() - (camera.viewportHeight / 2f);
+
+        camera.position.x = MathUtils.clamp(targetX, minX, maxX);
+        camera.position.y = MathUtils.clamp(targetY, minY, maxY);
+        camera.update();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        palcoUI.getViewport().update(width, height, true);
+        hud.resize(width, height);
+        pauseOverlay.resize(width, height);
     }
 
     @Override public void show() {}
     @Override public void hide() {}
-    @Override public void pause() {}
+    @Override public void pause() { pausado = true; }
     @Override public void resume() {}
 
     @Override
     public void dispose() {
-        desenhadorFormas.dispose();
-        palcoUI.dispose();
-        skin.dispose();
+        mapRenderer.dispose();
+        world.dispose();
+        assets.dispose();
+        hud.dispose();
+        pauseOverlay.dispose();
     }
 }

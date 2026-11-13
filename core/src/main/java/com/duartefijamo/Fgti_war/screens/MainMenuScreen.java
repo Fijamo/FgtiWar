@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -20,113 +19,91 @@ import com.duartefijamo.Fgti_war.FgtiWar;
 import com.duartefijamo.Fgti_war.utils.Constants;
 
 /**
- * Tela do Menu Principal do jogo.
+ * Tela de Menu Principal do jogo FgtiWar.
  */
 public class MainMenuScreen implements Screen {
+
     private final FgtiWar jogo;
-    private Stage palco;
+    private final Stage stage;
     private Skin skin;
 
-    /**
-     * Construtor do Menu.
-     * @param jogo Instância principal do jogo.
-     */
     public MainMenuScreen(final FgtiWar jogo) {
         this.jogo = jogo;
-        // Cria o palco com a resolução virtual definida nas constantes
-        palco = new Stage(new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL));
-        // Define o palco para receber entradas (toques/cliques)
-        Gdx.input.setInputProcessor(palco);
+        this.stage = new Stage(new FitViewport(Constants.LARGURA_VIRTUAL, Constants.ALTURA_VIRTUAL));
+        Gdx.input.setInputProcessor(stage);
 
         criarSkin();
         criarInterface();
     }
 
-    /**
-     * Cria o visual básico (Skin) para os botões e textos.
-     */
     private void criarSkin() {
         skin = new Skin();
 
-        // Cria uma textura branca simples para o fundo dos botões
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         skin.add("branco", new Texture(pixmap));
 
-        // Adiciona uma fonte padrão
-        BitmapFont fonte = new BitmapFont();
-        skin.add("padrao", fonte);
+        BitmapFont font = new BitmapFont();
+        skin.add("padrao", font);
 
-        // Define o estilo dos botões de texto
-        TextButton.TextButtonStyle estiloBotao = new TextButton.TextButtonStyle();
-        estiloBotao.up = skin.newDrawable("branco", Color.DARK_GRAY);
-        estiloBotao.down = skin.newDrawable("branco", Color.NAVY);
-        estiloBotao.font = skin.getFont("padrao");
-        skin.add("padrao", estiloBotao);
+        TextButton.TextButtonStyle styleButton = new TextButton.TextButtonStyle();
+        styleButton.up = skin.newDrawable("branco", Color.DARK_GRAY);
+        styleButton.down = skin.newDrawable("branco", Color.NAVY);
+        styleButton.font = skin.getFont("padrao");
+        skin.add("default", styleButton);
 
-        // Define o estilo dos rótulos (Labels)
-        Label.LabelStyle estiloLabel = new Label.LabelStyle();
-        estiloLabel.font = skin.getFont("padrao");
-        skin.add("padrao", estiloLabel);
+        Label.LabelStyle styleLabel = new Label.LabelStyle();
+        styleLabel.font = skin.getFont("padrao");
+        skin.add("default", styleLabel);
     }
 
-    /**
-     * Organiza os elementos visuais na tela usando uma tabela.
-     */
     private void criarInterface() {
-        Table tabela = new Table();
-        tabela.setFillParent(true); // Faz a tabela ocupar a tela inteira
-        palco.addActor(tabela);
+        Table table = new Table();
+        table.setFillParent(true);
+        stage.addActor(table);
 
-        // Título do Jogo
-        Label titulo = new Label("FGTIWAR", skin, "padrao");
-        titulo.setFontScale(2.0f); // Deixa o título maior
+        Label title = new Label("FGTIWAR", skin);
+        title.setFontScale(2.5f);
+        title.setColor(Color.CYAN);
 
-        // Texto do Menu
-        Label menuTexto = new Label("MENU", skin, "padrao");
+        Label subTitle = new Label("A JORNADA ACADEMICA", skin);
+        subTitle.setFontScale(1.2f);
 
-        // Botão Jogar
-        TextButton botaoJogar = new TextButton("JOGAR", skin, "padrao");
-        botaoJogar.addListener(new ClickListener() {
+        TextButton btnPlay = new TextButton("JOGAR", skin);
+        btnPlay.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Muda para a tela de jogo quando clicado
-                jogo.setScreen(new GameScreen(jogo));
+                jogo.setScreen(new LevelSelectScreen(jogo));
             }
         });
 
-        // Botão Sair
-        TextButton botaoSair = new TextButton("SAIR", skin, "padrao");
-        botaoSair.addListener(new ClickListener() {
+        TextButton btnExit = new TextButton("SAIR", skin);
+        btnExit.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Fecha o aplicativo
                 Gdx.app.exit();
             }
         });
 
-        // Adiciona os elementos à tabela organizados em linhas
-        tabela.add(titulo).padBottom(30).row();
-        tabela.add(menuTexto).padBottom(20).row();
-        tabela.add(botaoJogar).size(200, 60).padBottom(10).row();
-        tabela.add(botaoSair).size(200, 60).padBottom(20);
+        table.add(title).padBottom(5).row();
+        table.add(subTitle).padBottom(30).row();
+        table.add(btnPlay).size(220, 54).padBottom(15).row();
+        table.add(btnExit).size(220, 54);
     }
 
     @Override
     public void render(float delta) {
-        // Limpa a tela com uma cor azul escura
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(0.05f, 0.05f, 0.15f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Desenha os elementos do palco
-        palco.act(delta);
-        palco.draw();
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        palco.getViewport().update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override public void show() {}
@@ -136,7 +113,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        palco.dispose();
+        stage.dispose();
         skin.dispose();
     }
 }
